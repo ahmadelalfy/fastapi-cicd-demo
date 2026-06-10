@@ -17,3 +17,9 @@ def health():
 def version():
     return {"version": "1.0.0"}
 
+
+@app.get("/environment")
+def environment():
+    return {"environment": "development"}
+
+
