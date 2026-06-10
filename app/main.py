@@ -1,0 +1,13 @@
+from fastapi import FastAPI
+
+app = FastAPI(title="FastAPI CI/CD Demo")
+
+
+@app.get("/")
+def root():
+    return {"message": "FastAPI CI/CD Demo is running"}
+
+
+@app.get("/health")
+def health():
+    return {"status": "healthy"}
