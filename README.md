@@ -113,3 +113,4 @@ If any step fails, the workflow fails and the PR or push is blocked from passing
 - Push this repo to GitHub and open a pull request to see CI in action
 - Add more endpoints and tests as you grow the project
 - Extend the pipeline with coverage reports, deployment stages, or Docker (when ready)
+Testing branch protection rules.
