@@ -14,22 +14,83 @@ on:
 
 jobs:
   test:
+    name: test
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout source code
         uses: actions/checkout@v4
 
-      - name: Set up Python 3.11
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-      - name: Lint with ruff
-        run: ruff check .
+      - name: Run lint
+        run: |
+          ruff check .
 
       - name: Run tests
-        run: pytest
+        run: |
+          pytest
+
+  package:
+    name: package
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/qc' || github.ref == 'refs/heads/main')
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Create artifact folder
+        run: |
+          mkdir -p build/fastapi-cicd-demo
+          cp -r app build/fastapi-cicd-demo/
+          cp -r tests build/fastapi-cicd-demo/
+          cp requirements.txt build/fastapi-cicd-demo/
+          cp README.md build/fastapi-cicd-demo/
+
+      - name: Create zip package
+        run: |
+          cd build
+          zip -r fastapi-cicd-demo.zip fastapi-cicd-demo
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fastapi-cicd-demo
+          path: build/fastapi-cicd-demo.zip
+
+  deploy-qc-simulation:
+    name: deploy-qc-simulation
+    runs-on: ubuntu-latest
+    needs: package
+    if: github.event_name == 'push' && github.ref == 'refs/heads/qc'
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: fastapi-cicd-demo
+          path: deploy
+
+      - name: Extract artifact
+        run: |
+          unzip deploy/fastapi-cicd-demo.zip -d deploy
+
+      - name: Validate deployed files
+        run: |
+          test -f deploy/fastapi-cicd-demo/app/main.py
+          test -f deploy/fastapi-cicd-demo/requirements.txt
+          test -d deploy/fastapi-cicd-demo/tests
+
+      - name: Show deployed package content
+        run: |
+          ls -R deploy/fastapi-cicd-demo
