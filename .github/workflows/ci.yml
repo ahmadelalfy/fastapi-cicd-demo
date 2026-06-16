@@ -57,6 +57,13 @@ jobs:
           cp requirements.txt build/fastapi-cicd-demo/
           cp README.md build/fastapi-cicd-demo/
 
+      - name: Simulate Python code obfuscation
+        run: |
+          echo "Obfuscation simulation completed" > build/fastapi-cicd-demo/OBFUSCATED.txt
+          echo "In a real project, this step can run PyArmor, Nuitka, or Cython." >> build/fastapi-cicd-demo/OBFUSCATED.txt
+          echo "Build branch: $GITHUB_REF_NAME" >> build/fastapi-cicd-demo/OBFUSCATED.txt
+          echo "Commit SHA: $GITHUB_SHA" >> build/fastapi-cicd-demo/OBFUSCATED.txt
+
       - name: Create zip package
         run: |
           cd build
