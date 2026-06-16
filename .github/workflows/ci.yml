@@ -73,6 +73,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: package
     if: github.event_name == 'push' && github.ref == 'refs/heads/qc'
+    environment: QC
 
     steps:
       - name: Download artifact
@@ -85,12 +86,43 @@ jobs:
         run: |
           unzip deploy/fastapi-cicd-demo.zip -d deploy
 
-      - name: Validate deployed files
+      - name: Validate QC deployed files
         run: |
           test -f deploy/fastapi-cicd-demo/app/main.py
           test -f deploy/fastapi-cicd-demo/requirements.txt
           test -d deploy/fastapi-cicd-demo/tests
 
-      - name: Show deployed package content
+      - name: Show QC deployed package content
         run: |
+          echo "QC deployment simulation completed successfully"
           ls -R deploy/fastapi-cicd-demo
+
+  deploy-production-simulation:
+    name: deploy-production-simulation
+    runs-on: ubuntu-latest
+    needs: package
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment: Production
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: fastapi-cicd-demo
+          path: deploy
+
+      - name: Extract artifact
+        run: |
+          unzip deploy/fastapi-cicd-demo.zip -d deploy
+
+      - name: Validate Production deployed files
+        run: |
+          test -f deploy/fastapi-cicd-demo/app/main.py
+          test -f deploy/fastapi-cicd-demo/requirements.txt
+          test -d deploy/fastapi-cicd-demo/tests
+
+      - name: Show Production deployed package content
+        run: |
+          echo "Production deployment simulation completed successfully"
+          ls -R deploy/fastapi-cicd-demo
+
